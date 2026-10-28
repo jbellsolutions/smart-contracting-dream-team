@@ -1,0 +1,37 @@
+# Private client details never go in this repo.
+CLIENT-CONTEXT.md
+client-context/*.md
+!client-context/README.md
+!client-context/CLIENT-CONTEXT.template.md
+!client-context/sources.template.md
+private/
+DREAM-MAP.md
+PERSONAL-CONTEXT.md
+
+# Secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*token*
+*secret*
+
+# Call recordings and transcripts
+*.mp4
+*.mov
+*.m4a
+*.mp3
+*.wav
+transcripts/
+
+# OS and editor noise
+.DS_Store
+node_modules/
+__pycache__/
+
+# Jesse's working data stays on his computer (radar leads, partner details)
+data/
+radar/found/
+dashboard/index.html
+*.local.*

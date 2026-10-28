@@ -1,0 +1,20 @@
+NAME: Call cards
+OWNER: Revenue Partner
+ROLE: revenue-partner
+WHEN: Weekdays at 9:13 AM and 2:13 PM NZ time (The CRON line is UTC, like your existing jobs. NZ daylight time shown; in NZ winter it runs an hour earlier by the NZ clock.)
+CRON: 13 20,1 * * *
+CRON_NZ: 13 9,14 * * 1-5
+SKILLS: scdt-business-context, scdt-call-card
+STATUS: Created paused. Turned on only after Jesse says yes.
+---
+Stop check: if ~/.hermes/scdt/state/EXTERNAL_WRITES_STOPPED exists, read only, send nothing to anyone but Jesse, report the recorded reason, and stop.
+Times are Pacific/Auckland. Every number names its source and read time. Nothing goes to anyone but Jesse without his exact reply words for that item (scdt-business-context, "Sending an email"), unless ~/.hermes/scdt/context/standing-approvals.md covers that exact message.
+Run log: when you finish, append "<time> · Call cards · EXECUTED · <one-line result>" to ~/.hermes/scdt/log/runs-<YYYY-MM>.md, or NO_CHANGE, or FAILED with the reason. A source you couldn't read is UNKNOWN, never zero.
+Cost: Two short runs a weekday. Reads the replies your existing reply check already logged; it never reads the inbox itself, so it adds no inbox calls. Silent when there are no warm replies.
+
+The job: follow scdt-call-card, "Each run".
+0. Weekend check: if today is Saturday or Sunday in New Zealand (TZ=Pacific/Auckland date +%u gives 6 or 7), log NO_CHANGE and stop.
+1. Read ~/.hermes/scdt/context/sources.md for the replies and tracker paths. Missing: post "Call cards can't run: sources.md is missing (install Step 1)" to Jesse once and log NO_CLIENT_SOURCE.
+2. Card each warm reply since the last run that hasn't been carded (partner_ledger.py card seen). At most 6 cards.
+3. Each card goes to Jesse in its own Slack thread and to his email. Nothing goes to the person who replied.
+4. Nothing warm: post nothing, log NO_CHANGE.

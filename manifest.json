@@ -1,0 +1,195 @@
+{
+  "schema_version": 1,
+  "build_standard": "client-build/1",
+  "name": "Jesse's AI team",
+  "description": "Upgrades Smart Contracting's existing Revenue Partner (Hermes on Orgo) with the whole partner program: call cards for warm replies, signing partners, monthly partner campaigns, referrals, the 5% fee worked out by a tested ledger tool, monthly payout proposals, a send-once outbox for partner emails and a Friday scoreboard. Adds a Claude Code workshop on Jesse's PC for the homeowner lead radar, partner packs, call coaching, and installing or restarting the Revenue Partner.",
+  "platform": "Hermes overlay",
+  "entry_point": "START-HERE.md",
+  "owner": "Jesse",
+  "timezone": "Pacific/Auckland",
+  "repo_url": "https://github.com/jbellsolutions/smart-contracting-dream-team",
+  "accounts": {
+    "business": {
+      "lead_bot": "Revenue Partner",
+      "workspace": "~/.hermes/scdt",
+      "ledger": "~/PartnerDesk",
+      "repo_on_box": "~/smart-contracting-dream-team"
+    },
+    "workshop": {
+      "tool": "Claude Code (Claude desktop app, Code tab) on Jesse's PC",
+      "entry_point": "CLAUDE.md"
+    }
+  },
+  "agents": [
+    {
+      "name": "Revenue Partner",
+      "charter": "agents/01-revenue-partner.md",
+      "account": "business",
+      "milestone": "M0",
+      "routines": [
+        "routines/call-cards.prompt",
+        "routines/credit-watch.prompt",
+        "routines/monthly-payouts.prompt",
+        "routines/partner-nurture.prompt",
+        "routines/weekly-scoreboard.prompt"
+      ],
+      "skills": [
+        "scdt-ask-ledger",
+        "scdt-getting-started",
+        "scdt-business-context",
+        "scdt-call-card",
+        "scdt-credit-watch",
+        "scdt-partner-campaign",
+        "scdt-partner-nurture",
+        "scdt-partner-program",
+        "scdt-partner-signed",
+        "scdt-payouts",
+        "scdt-referrals",
+        "scdt-scoreboard"
+      ]
+    },
+    {
+      "name": "Workshop",
+      "charter": "agents/02-workshop-claude-code.md",
+      "account": "workshop",
+      "milestone": "M0",
+      "routines": [],
+      "skills": [
+        "call-coach",
+        "getting-started",
+        "lead-radar",
+        "partner-pack",
+        "revenue-partner-doctor",
+        "upgrade-revenue-partner"
+      ]
+    },
+    {
+      "name": "Ops agent",
+      "charter": "agents/90-ops-agent.md",
+      "account": "business",
+      "milestone": "M3",
+      "reserved": true,
+      "routines": [],
+      "skills": []
+    },
+    {
+      "name": "LeadConnector link",
+      "charter": "agents/91-leadconnector-link.md",
+      "account": "business",
+      "milestone": "M2",
+      "reserved": true,
+      "routines": [],
+      "skills": []
+    },
+    {
+      "name": "Quote reactivation",
+      "charter": "agents/92-quote-reactivation.md",
+      "account": "business",
+      "milestone": "after M3",
+      "reserved": true,
+      "routines": [],
+      "skills": []
+    }
+  ],
+  "skills": [
+    {
+      "name": "scdt-ask-ledger",
+      "path": "skills/shared/scdt-ask-ledger"
+    },
+    {
+      "name": "scdt-getting-started",
+      "path": "skills/shared/scdt-getting-started"
+    },
+    {
+      "name": "scdt-business-context",
+      "path": "skills/revenue-partner/scdt-business-context"
+    },
+    {
+      "name": "scdt-call-card",
+      "path": "skills/revenue-partner/scdt-call-card"
+    },
+    {
+      "name": "scdt-credit-watch",
+      "path": "skills/revenue-partner/scdt-credit-watch"
+    },
+    {
+      "name": "scdt-partner-campaign",
+      "path": "skills/revenue-partner/scdt-partner-campaign"
+    },
+    {
+      "name": "scdt-partner-nurture",
+      "path": "skills/revenue-partner/scdt-partner-nurture"
+    },
+    {
+      "name": "scdt-partner-program",
+      "path": "skills/revenue-partner/scdt-partner-program"
+    },
+    {
+      "name": "scdt-partner-signed",
+      "path": "skills/revenue-partner/scdt-partner-signed"
+    },
+    {
+      "name": "scdt-payouts",
+      "path": "skills/revenue-partner/scdt-payouts"
+    },
+    {
+      "name": "scdt-referrals",
+      "path": "skills/revenue-partner/scdt-referrals"
+    },
+    {
+      "name": "scdt-scoreboard",
+      "path": "skills/revenue-partner/scdt-scoreboard"
+    },
+    {
+      "name": "call-coach",
+      "path": ".claude/skills/call-coach",
+      "runs_in": "Claude Code"
+    },
+    {
+      "name": "getting-started",
+      "path": ".claude/skills/getting-started",
+      "runs_in": "Claude Code"
+    },
+    {
+      "name": "lead-radar",
+      "path": ".claude/skills/lead-radar",
+      "runs_in": "Claude Code"
+    },
+    {
+      "name": "partner-pack",
+      "path": ".claude/skills/partner-pack",
+      "runs_in": "Claude Code"
+    },
+    {
+      "name": "revenue-partner-doctor",
+      "path": ".claude/skills/revenue-partner-doctor",
+      "runs_in": "Claude Code"
+    },
+    {
+      "name": "upgrade-revenue-partner",
+      "path": ".claude/skills/upgrade-revenue-partner",
+      "runs_in": "Claude Code"
+    }
+  ],
+  "tools": [
+    {
+      "name": "partner_ledger",
+      "path": "tools/partner_ledger.py",
+      "tests": "tools/test_partner_ledger.py"
+    },
+    {
+      "name": "credit_check",
+      "path": "tools/credit_check.py"
+    }
+  ],
+  "install": {
+    "script": "install/install.sh",
+    "pack": "dist/revenue-partner-upgrade.zip",
+    "pack_builder": "scripts/build_pack.py",
+    "upload_test": "dist/canary.md"
+  },
+  "projects": [],
+  "roles": [
+    "revenue-partner"
+  ]
+}

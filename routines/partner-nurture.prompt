@@ -1,0 +1,19 @@
+NAME: Partner nurture
+OWNER: Revenue Partner
+ROLE: revenue-partner
+WHEN: Tuesdays at 10:23 AM NZ time (The CRON line is UTC, like your existing jobs. NZ daylight time shown; in NZ winter it runs an hour earlier by the NZ clock.)
+CRON: 23 21 * * 1
+CRON_NZ: 23 10 * * 2
+SKILLS: scdt-business-context, scdt-partner-nurture
+STATUS: Created paused. Turned on only after Jesse says yes.
+---
+Stop check: if ~/.hermes/scdt/state/EXTERNAL_WRITES_STOPPED exists, read only, send nothing to anyone but Jesse, report the recorded reason, and stop.
+Times are Pacific/Auckland. Every number names its source and read time. Nothing goes to anyone but Jesse without his exact reply words for that item (scdt-business-context, "Sending an email"), unless ~/.hermes/scdt/context/standing-approvals.md covers that exact message.
+Run log: when you finish, append "<time> · Partner nurture · EXECUTED · <one-line result>" to ~/.hermes/scdt/log/runs-<YYYY-MM>.md, or NO_CHANGE, or FAILED with the reason. A source you couldn't read is UNKNOWN, never zero.
+Cost: One run a week. Reads the ledger; at most 3 drafts.
+
+The job: follow scdt-partner-nurture.
+1. If ~/.hermes/scdt/state/PARTNER_CAMPAIGNS_PAUSED exists: list who's due in one message and stop.
+2. Find partners who are due (quiet, campaign month arrived, a paid referral to thank).
+3. Draft at most 3 check-ins, each in its own thread with its own reply words (send check-in or send thanks). Send nothing yourself.
+4. Nobody due: post nothing, log NO_CHANGE.

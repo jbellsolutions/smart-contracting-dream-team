@@ -1,0 +1,5 @@
+# The install scripts run on Linux: keep LF line endings on every checkout, including Windows.
+* text=auto eol=lf
+*.zip binary
+*.png binary
+*.pdf binary

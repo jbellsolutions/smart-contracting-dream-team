@@ -1,0 +1,18 @@
+NAME: Weekly scoreboard
+OWNER: Revenue Partner
+ROLE: revenue-partner
+WHEN: Fridays at 3:37 PM NZ time (The CRON line is UTC, like your existing jobs. NZ daylight time shown; in NZ winter it runs an hour earlier by the NZ clock.)
+CRON: 37 2 * * 5
+CRON_NZ: 37 15 * * 5
+SKILLS: scdt-business-context, scdt-scoreboard
+STATUS: Created paused. Turned on only after Jesse says yes.
+---
+Stop check: if ~/.hermes/scdt/state/EXTERNAL_WRITES_STOPPED exists, read only, send nothing to anyone but Jesse, report the recorded reason, and stop.
+Times are Pacific/Auckland. Every number names its source and read time. Nothing goes to anyone but Jesse without his exact reply words for that item (scdt-business-context, "Sending an email"), unless ~/.hermes/scdt/context/standing-approvals.md covers that exact message.
+Run log: when you finish, append "<time> · Weekly scoreboard · EXECUTED · <one-line result>" to ~/.hermes/scdt/log/runs-<YYYY-MM>.md, or NO_CHANGE, or FAILED with the reason. A source you couldn't read is UNKNOWN, never zero.
+Cost: One run a week. Two ledger commands and one read of the outreach tracker.
+
+The job: follow scdt-scoreboard.
+1. python3 ~/smart-contracting-dream-team/tools/partner_ledger.py scoreboard --period week (first Friday of the month: --period month).
+2. Count this week's sends and replies in the outreach tracker (read only; path in sources.md).
+3. Post one message to Jesse, 10 lines or fewer. Send it to Mike too only if standing-approvals.md records Jesse's "send Mike weekly" for that.

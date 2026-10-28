@@ -1,0 +1,18 @@
+NAME: Monthly partner payouts
+OWNER: Revenue Partner
+ROLE: revenue-partner
+WHEN: The 2nd of each month at 9:17 AM NZ time (The CRON line is UTC, like your existing jobs. NZ daylight time shown; in NZ winter it runs an hour earlier by the NZ clock.)
+CRON: 17 20 1 * *
+CRON_NZ: 17 9 2 * *
+SKILLS: scdt-business-context, scdt-payouts
+STATUS: Created paused. Turned on only after Jesse says yes.
+---
+Stop check: if ~/.hermes/scdt/state/EXTERNAL_WRITES_STOPPED exists, read only, send nothing to anyone but Jesse, report the recorded reason, and stop.
+Times are Pacific/Auckland. Every number names its source and read time. Nothing goes to anyone but Jesse without his exact reply words for that item (scdt-business-context, "Sending an email"), unless ~/.hermes/scdt/context/standing-approvals.md covers that exact message.
+Run log: when you finish, append "<time> · Monthly partner payouts · EXECUTED · <one-line result>" to ~/.hermes/scdt/log/runs-<YYYY-MM>.md, or NO_CHANGE, or FAILED with the reason. A source you couldn't read is UNKNOWN, never zero.
+Cost: One run a month. One ledger command.
+
+The job: follow scdt-payouts, "1. Propose".
+1. python3 ~/smart-contracting-dream-team/tools/partner_ledger.py payouts propose --month <last month in NZ time, YYYY-MM> (work it out with TZ=Pacific/Auckland date)
+2. Post exactly what it printed to Jesse in its own thread with the one-line explanation from the skill. Nothing owed: post nothing, log NO_CHANGE.
+3. Never approve, pay or send a remittance in this run. Those happen only when Jesse replies.

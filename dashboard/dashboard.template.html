@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en-NZ">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Smart Contracting Partner Board</title>
+<style>
+:root{--bg:#f6f7f4;--card:#fff;--ink:#1d2321;--muted:#5d6763;--line:#e1e5e0;--brand:#0f6b5c;--brand-soft:#e3f1ed;--warn:#a5550a;--warn-soft:#fbefe1;--bad:#a12a2a;--good:#1f7a3d}
+@media (prefers-color-scheme:dark){:root{--bg:#121614;--card:#1b201e;--ink:#e8ece9;--muted:#9aa5a0;--line:#2b322f;--brand:#5cc3ad;--brand-soft:#1d3530;--warn:#f0b06a;--warn-soft:#3a2d1c;--bad:#f08a8a;--good:#7fd39b}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+main{max-width:1100px;margin:0 auto;padding:20px 16px 48px}
+header{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:18px}
+h1{font-size:22px;margin:0}
+h2{font-size:16px;margin:28px 0 10px}
+.muted{color:var(--muted)}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px}
+.tile{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.tile .v{font-size:26px;font-weight:650;margin-top:2px}
+.tile .l{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:auto}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;background:var(--card);position:sticky;top:0}
+tr:last-child td{border-bottom:0}
+.pill{display:inline-block;padding:1px 8px;border-radius:99px;font-size:12px;background:var(--brand-soft);color:var(--brand);white-space:nowrap}
+.pill.warn{background:var(--warn-soft);color:var(--warn)}
+.funnel{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px}
+.step{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px;text-align:center}
+.step b{display:block;font-size:22px}
+.empty{padding:14px;color:var(--muted)}
+.ms{list-style:none;margin:0;padding:0}
+.ms li{padding:8px 12px;border-bottom:1px solid var(--line)}
+.ms li:last-child{border-bottom:0}
+a{color:var(--brand)}
+footer{margin-top:28px;font-size:12px;color:var(--muted)}
+</style>
+</head>
+<body>
+<main>
+<header>
+  <h1>Smart Contracting: partners and radar</h1>
+  <span class="muted" id="updated"></span>
+</header>
+
+<section class="tiles" id="tiles"></section>
+
+<h2>Referral jobs this month</h2>
+<section class="funnel" id="funnel"></section>
+
+<h2>Partners</h2>
+<div class="card"><table id="partners"></table></div>
+
+<h2>Fees to pay partners</h2>
+<div class="card"><table id="owed"></table></div>
+
+<h2>Radar: people asking for drain help</h2>
+<div class="card"><table id="radar"></table></div>
+
+<h2>Partner campaigns</h2>
+<div class="card"><table id="campaigns"></table></div>
+
+<h2>Milestones</h2>
+<div class="card"><ul class="ms" id="milestones"></ul></div>
+
+<footer>Built from the files in <code>data/</code>. A dash means the number isn't recorded yet. It doesn't mean zero. To refresh, say "update the dashboard" in Claude Code.</footer>
+</main>
+
+<!-- Claude replaces everything inside this block with rows from data/*.csv (one object per row, CSV headers as keys). -->
+<script id="dash-data" type="application/json">
+{"updated":"","month":"","partners":[],"referrals":[],"payouts":[],"campaigns":[],"radar":[],"milestones":[]}
+</script>
+
+<script>
+(function(){
+  const D = JSON.parse(document.getElementById('dash-data').textContent);
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const num = v => { const n = parseFloat(String(v ?? '').replace(/[$,\s]/g,'')); return isFinite(n) ? n : null; };
+  const nzd = v => v === null ? '—' : '$' + v.toLocaleString('en-NZ',{maximumFractionDigits:0});
+  const sum = (rows, k) => { const xs = rows.map(r => num(r[k])).filter(x => x !== null); return xs.length ? xs.reduce((a,b)=>a+b,0) : null; };
+  const month = D.month || new Date().toISOString().slice(0,7);
+  const inMonth = d => String(d||'').slice(0,7) === month;
+  const P = D.partners||[], R = D.referrals||[], C = D.campaigns||[], RD = D.radar||[];
+
+  $('updated').textContent = D.updated ? 'Updated ' + D.updated : 'Not built from data yet';
+
+  const active = P.filter(p => /signed|active/i.test(p.status||''));
+  const rMonth = R.filter(r => inMonth(r.date_in));
+  const won = rMonth.filter(r => /won|done|paid/i.test(r.status||''));
+  const owed = R.filter(r => num(r.fee_nzd) !== null && !/paid/i.test(r.fee_status||''));
+  const weekAgo = new Date(Date.now() - 7*864e5).toISOString().slice(0,10);
+  const rdWeek = RD.filter(l => String(l.found_on||'') >= weekAgo);
+  const tiles = [
+    ['Active partners', P.length ? active.length : '—'],
+    ['Partner prospects', P.length ? P.filter(p => /prospect|talking/i.test(p.status||'')).length : '—'],
+    ['Referrals this month', R.length ? rMonth.length : '—'],
+    ['Jobs won this month', R.length ? won.length : '—'],
+    ['Partner revenue (ex GST)', nzd(sum(won,'invoice_ex_gst_nzd'))],
+    ['Fees owed to partners', nzd(sum(owed,'fee_nzd'))],
+    ['Radar leads, last 7 days', RD.length ? rdWeek.length : '—'],
+    ['Radar replies sent', RD.length ? RD.filter(l => /replied|won/i.test(l.status||'')).length : '—']
+  ];
+  $('tiles').innerHTML = tiles.map(([l,v]) => `<div class="tile"><div class="l">${esc(l)}</div><div class="v">${esc(v)}</div></div>`).join('');
+
+  const stages = ['new','quoted','won','paid','lost'];
+  $('funnel').innerHTML = R.length
+    ? stages.map(s => `<div class="step"><b>${rMonth.filter(r => (r.status||'').toLowerCase()===s).length}</b>${s}</div>`).join('')
+    : '<div class="empty">No referral jobs recorded yet.</div>';
+
+  const table = (el, cols, rows, empty) => {
+    $(el).innerHTML = rows.length
+      ? `<thead><tr>${cols.map(c=>`<th>${esc(c[0])}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>`<tr>${cols.map(c=>`<td>${c[1](r)}</td>`).join('')}</tr>`).join('')}</tbody>`
+      : `<tbody><tr><td class="empty">${esc(empty)}</td></tr></tbody>`;
+  };
+  const statusPill = s => `<span class="pill${/prospect|talking|new|owed/i.test(s||'')?' warn':''}">${esc(s||'—')}</span>`;
+
+  table('partners', [
+    ['Business', p => esc(p.business)], ['Type', p => esc(p.partner_type)], ['Status', p => statusPill(p.status)],
+    ['Referrals', p => R.filter(r => r.partner_id===p.partner_id).length],
+    ['Won (all time)', p => nzd(sum(R.filter(r => r.partner_id===p.partner_id && /won|paid/i.test(r.status||'')),'invoice_ex_gst_nzd'))],
+    ['Next step', p => esc([p.next_step, p.next_step_date].filter(Boolean).join(' · ') || '—')]
+  ], P, 'No partners yet. Say "a partner signed" in Claude Code to add the first one.');
+
+  table('owed', [
+    ['Partner', r => esc((P.find(p => p.partner_id===r.partner_id)||{}).business || r.partner_id)],
+    ['Customer job', r => esc([r.job_type, r.suburb].filter(Boolean).join(', '))],
+    ['Invoice paid', r => esc(r.invoice_paid_on || 'not yet')],
+    ['Fee', r => nzd(num(r.fee_nzd))], ['Status', r => statusPill(r.fee_status || 'owed')]
+  ], owed, 'Nothing owed right now.');
+
+  table('radar', [
+    ['Found', l => esc(l.found_on)], ['Where', l => l.link ? `<a href="${esc(l.link)}" target="_blank" rel="noopener">${esc(l.source_name||l.lane)}</a>` : esc(l.source_name||l.lane)],
+    ['Suburb', l => esc(l.suburb||'—')], ['What they need', l => esc(l.need)], ['Tier', l => esc(l.tier)], ['Status', l => statusPill(l.status)]
+  ], RD.slice().sort((a,b) => String(b.found_on).localeCompare(String(a.found_on))).slice(0,25), 'No radar leads yet. Say "run the radar" in Claude Code.');
+
+  table('campaigns', [
+    ['Month', c => esc(c.month)], ['Partner', c => esc((P.find(p => p.partner_id===c.partner_id)||{}).business || c.partner_id)],
+    ['Theme', c => esc(c.theme)], ['Sent', c => esc(c.partner_sent_on||'not yet')],
+    ['Bookings', c => esc(c.bookings||'—')], ['Revenue (ex GST)', c => nzd(num(c.revenue_ex_gst_nzd))]
+  ], C, 'No partner campaigns yet.');
+
+  const M = D.milestones||[];
+  $('milestones').innerHTML = M.length ? M.map(m => `<li>${m.done ? '✅' : '⬜️'} ${esc(m.name)}${m.note ? ` <span class="muted">· ${esc(m.note)}</span>` : ''}</li>`).join('') : '<li class="empty">Milestones appear after setup.</li>';
+})();
+</script>
+</body>
+</html>
